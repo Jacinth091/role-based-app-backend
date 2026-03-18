@@ -4,17 +4,27 @@ const { accounts } = require("../data.js");
 const { SECRET_KEY } = require("../config.js");
 
 const login = async (req, res) => {
-  const { username, password } = req.body;
-
+  const { userStr, password } = req.body;
   try {
-    const user = accounts.find((u) => u.username === username);
+    console.log("Body: ", req.body);
+    if (!userStr || !userStr.trim() || !password || !password.trim()) {
+      return res.status(400).json({
+        error: "Username/Email and Password are required!"
+      });
+    }
+    
+    const cleanUserStr = userStr.trim();
+    const user = accounts.find(
+      (u) => u.email && u.email.toLowerCase() === cleanUserStr.toLowerCase() || 
+            (u.username && u.username.toLowerCase() === cleanUserStr.toLowerCase())
+    );
     console.log("User: ", user);
+
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({
         error: "Invalid Credentials",
       });
     }
-
     const token = jwt.sign(
       { id: user.id, username: user.username, role: user.role },
       SECRET_KEY,
@@ -24,28 +34,28 @@ const login = async (req, res) => {
     return res.status(200).json({
       token,
       user: {
-        username: user.username,
+        username: user.username, 
         role: user.role,
       },
     });
   } catch (error) {
     console.error("An error occurred! ", error);
     return res.status(500).json({
-      error,
+      error: error,
       message: "Internal Server Error!",
     });
   }
 };
 
 const register = async (req, res) => {
-  const { username, password, role = "user" } = req.body;
+  const { userStr, password, role = "user" } = req.body;
   try {
-    if (!username.trim() || !password.trim()) {
+    if (!userStr.trim() || !password.trim()) {
       return res.status(400).json({
-        message: "Username and password required.",
+        message: "userStr and password required.",
       });
     }
-    const exists = accounts.find((u) => u.username === username);
+    const exists = accounts.find((u) => u.userStr === userStr);
     if (exists) {
       return res.status(409).json({
         error: "User already exists!",
@@ -55,7 +65,7 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = {
       id: accounts.length + 1,
-      username,
+      userStr,
       password: hashedPassword,
       role,
     };
@@ -63,14 +73,14 @@ const register = async (req, res) => {
     console.log("Accounts: ", accounts);
     return res.status(201).json({
       message: "User Registered!",
-      username,
+      userStr,
       role,
       accountList: accounts,
     });
-  } catch (err) {
+  } catch (error) {
+    console.error("An error occurred! ", error);
     return res.status(500).json({
-      error: err,
-      message: "Internal Server Error!",
+      error: "Internal Server Error!",
     });
   }
 };
