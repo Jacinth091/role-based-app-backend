@@ -12,74 +12,105 @@ const login = async (req, res) => {
         error: "Username/Email and Password are required!"
       });
     }
-    
     const cleanUserStr = userStr.trim();
     const user = accounts.find(
-      (u) => u.email && u.email.toLowerCase() === cleanUserStr.toLowerCase() || 
-            (u.username && u.username.toLowerCase() === cleanUserStr.toLowerCase())
+      (u) => u.email && u.email.toLowerCase() === cleanUserStr.toLowerCase() ||
+        (u.username && u.username.toLowerCase() === cleanUserStr.toLowerCase())
     );
-    console.log("User: ", user);
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user) {
+      console.log("BRUEEHHHHHH");
+      return res.status(400).json({
+        success: false,
+        error: "Account not found! Register first.",
+      });
+    }
+    if (!user.verified) {
       return res.status(401).json({
+        success: false,
+        notVerified: true,
+        error: "Account not verified!",
+        email: user.email,
+      });
+    }
+    if (!(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({
+        success: false,
         error: "Invalid Credentials",
       });
     }
     const token = jwt.sign(
-      { id: user.id, username: user.username, role: user.role },
+      { id: user.id, role: user.role },
       SECRET_KEY,
       { expiresIn: "1h" },
     );
 
     return res.status(200).json({
+      success: true,
       token,
       user: {
-        username: user.username, 
+        username: user.username,
+        email: user.email,
         role: user.role,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        middle_name: user.middle_name
       },
     });
   } catch (error) {
     console.error("An error occurred! ", error);
     return res.status(500).json({
-      error: error,
-      message: "Internal Server Error!",
+      success: false,
+      error: "Internal Server Error!",
     });
   }
 };
 
 const register = async (req, res) => {
-  const { userStr, password, role = "user" } = req.body;
+  console.log("Request Body: ", req.body);
+  const { username, email, first_name, last_name, middle_name, password } = req.body;
   try {
-    if (!userStr.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim() || !email.trim() || !first_name.trim() || !last_name.trim()) {
       return res.status(400).json({
-        message: "userStr and password required.",
+        success: false,
+        error: "Important fields are required.",
       });
     }
-    const exists = accounts.find((u) => u.userStr === userStr);
-    if (exists) {
+    const user = accounts.find(
+      (u) => u.email && u.email.toLowerCase() === email.toLowerCase() ||
+        (u.username && u.username.toLowerCase() === username.toLowerCase())
+    );
+    if (user) {
       return res.status(409).json({
+        success: false,
         error: "User already exists!",
       });
     }
-
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = {
       id: accounts.length + 1,
-      userStr,
+      username,
+      email,
+      first_name,
+      middle_name: middle_name ? middle_name : '',
+      last_name,
       password: hashedPassword,
-      role,
+      role: "user",
+      verified: false,
     };
     accounts.push(newUser);
     console.log("Accounts: ", accounts);
     return res.status(201).json({
-      message: "User Registered!",
-      userStr,
-      role,
-      accountList: accounts,
+      success: true,
+      message: "User Registered Successfully!",
+      data: {
+        username: newUser.username,
+        email: newUser.email,
+      }
     });
   } catch (error) {
     console.error("An error occurred! ", error);
     return res.status(500).json({
+      success: false,
       error: "Internal Server Error!",
     });
   }
@@ -89,4 +120,32 @@ const profile = async (req, res) => {
   res.json({ user: req.user });
 };
 
-module.exports = { login, register, profile };
+const verifyEmail = async (req, res) => {
+  console.log("REq.body Email: ", req.body);
+  const { email } = req.body;
+  try {
+    const user = accounts.find(
+      (u) => u.email && u.email.toLowerCase() === email.toLowerCase()
+    );
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+
+        error: "User not found!",
+      });
+    }
+    user.verified = true;
+    return res.status(200).json({
+      success: true,
+      message: "Email Verified Successfully!",
+    });
+  } catch (error) {
+    console.error("An error occurred! ", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal Server Error!",
+    });
+  }
+};
+
+module.exports = { login, register, profile, verifyEmail };
