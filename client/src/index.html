@@ -79,7 +79,7 @@
             Refresh to reset.
           </p>
         </div>
-        <button class="btn btn-primary align-self-start" onclick="navigateTo('#/login')">
+        <button class="btn btn-primary align-self-start" id="get-started-btn">
           Get Started
         </button>
       </div>
@@ -101,7 +101,7 @@
             <input type="password" class="form-control password-toggleable" id="password" name="password" required />
           </div>
           <button type="submit" class="btn btn-primary">Login</button>
-          <button type="button" class="btn btn-outline-secondary" onclick="navigateTo('#/home')">
+          <button type="button" class="btn btn-outline-secondary" id="login-cancel-btn">
             Cancel
           </button>
         </form>
@@ -146,7 +146,7 @@
               name="confirm_password" required />
           </div>
           <button type="submit" class="btn btn-success">Sign Up</button>
-          <button type="button" onclick="navigateTo('#/home')" class="btn btn-outline-secondary">
+          <button type="button" id="register-cancel-btn" class="btn btn-outline-secondary">
             Cancel
           </button>
         </form>
@@ -167,10 +167,10 @@
             For demo purposes, click below to emulate verification.
           </p>
           <div class="align-self-start d-flex align-items-center justify-content-center w-auto gap-2">
-            <button type="button" class="btn btn-success" onclick="verifyEmail()">
+            <button type="button" class="btn btn-success" id="verify-email-btn">
               Simulate Email Verification
             </button>
-            <button type="button" class="btn btn-outline-secondary" onclick="navigateTo('#/login')">
+            <button type="button" class="btn btn-outline-secondary" id="go-to-login-btn">
               Go to Login
             </button>
           </div>
@@ -192,6 +192,10 @@
             <span id="user-email" class="fw-normal"></span>
           </p>
           <p class="fw-bold">
+            Username:
+            <span id="user-username" class="fw-normal"></span>
+          </p>
+          <p class="fw-bold">
             Role: <span id="user-role" class="fw-normal"></span>
           </p>
           <button class="btn btn-outline-primary" id="edit-profile">
@@ -208,7 +212,7 @@
       <div class="container-fluid">
         <div class="d-flex align-items-center justify-content-between">
           <p class="h2">Employees</p>
-          <button type="button" class="btn btn-success" id="add-emp-btn" onclick="openEmpDetailCont()">
+          <button type="button" class="btn btn-success" id="add-emp-btn">
             + Add Employee
           </button>
         </div>
@@ -263,7 +267,7 @@
           </div>
           <div class="mt-2">
             <button type="submit" class="btn btn-primary">Save</button>
-            <button type="button" class="btn btn-secondary" onclick="closeEmpDetailCont()">
+            <button type="button" class="btn btn-secondary" id="emp-cancel-btn">
               Cancel
             </button>
           </div>
@@ -272,24 +276,30 @@
       <!-- DELETE EMPLOYEE CONFIRMATION MODAL -->
       <section id="delete-confirm-modal-emp" class="modal fade" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <div class="container-fluid d-flex align-items-center justify-content-between">
-                <h1 class="modal-title fs-5">Delete Employee</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
+          <div class="modal-content border-0 shadow-lg rounded-4 text-center">
+
+            <div class="position-absolute top-0 end-0 p-3 z-3">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body"></div>
-            <div class="modal-footer align-self-start">
-              <div class="container-fluid">
-                <button type="submit" class="btn btn-danger" id="confirm-delete-emp-btn">
-                  Confirm Delete
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Cancel">
-                  Cancel
-                </button>
-              </div>
+
+            <div class="pt-4 pb-1 px-4">
+              <i class="bi bi-exclamation-circle text-danger mb-2" style="font-size: 3rem; display: block;"></i>
+              <h4 class="fw-bold mb-1">Delete Employee?</h4>
+              <p class="text-danger fw-medium small mb-0">This action cannot be undone.</p>
             </div>
+
+            <div class="modal-body px-4 py-2 text-start">
+            </div>
+
+            <div class="modal-footer border-top-0 justify-content-center pt-2 pb-4 gap-2">
+              <button type="button" class="btn btn-light px-4 fw-medium" data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-danger px-4 fw-medium" id="confirm-delete-emp-btn">
+                Yes, Delete
+              </button>
+            </div>
+
           </div>
         </div>
       </section>
@@ -324,7 +334,7 @@
       <div class="container-fluid">
         <div class="d-flex align-items-center justify-content-between mb-4">
           <p class="h2">Accounts</p>
-          <button type="button" class="btn btn-success" id="add-account" onclick="openAccountForm()">
+          <button type="button" class="btn btn-success" id="add-account">
             + Add Account
           </button>
         </div>
@@ -332,6 +342,7 @@
           <thead>
             <th scope="col">Name</th>
             <th scope="col">Email</th>
+            <th scope="col">Username</th>
             <th scope="col">Role</th>
             <th scope="col">Verified</th>
             <th scope="col">Actions</th>
@@ -357,6 +368,11 @@
           <div class="d-flex flex-column align-items-start justify-content-center w-100">
             <label for="acc-email" class="form-label">Email</label>
             <input type="text" name="email" id="acc-email" class="w-100 form-control" placeholder="email@example.com" />
+          </div>
+          <div class="d-flex flex-column align-items-start justify-content-center w-100">
+            <label for="acc-email" class="form-label">Username</label>
+            <input type="text" name="username" id="acc-username" class="w-100 form-control"
+              placeholder="Input username" />
           </div>
           <div class="d-flex flex-column align-items-start justify-content-center w-100">
             <label for="acc-pw" class="form-label">Password</label>
@@ -390,7 +406,7 @@
             <button type="submit" class="btn btn-primary" id="save-acc-btn">
               Save
             </button>
-            <button type="button" class="btn btn-secondary" onclick="closeAccountForm()">
+            <button type="button" class="btn btn-secondary" id="acc-cancel-btn">
               Cancel
             </button>
           </div>
@@ -441,24 +457,30 @@
       <!-- DELETE USER CONFIRMATION MODAL -->
       <section id="delete-confirm-modal" class="modal fade" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <div class="container-fluid d-flex align-items-center justify-content-between">
-                <h1 class="modal-title fs-5">Delete User</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
+          <div class="modal-content border-0 shadow-lg rounded-4 text-center">
+
+            <div class="position-absolute top-0 end-0 p-3 z-3">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body"></div>
-            <div class="modal-footer align-self-start">
-              <div class="container-fluid">
-                <button type="submit" class="btn btn-danger" id="confirm-delete-btn">
-                  Confirm Delete
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Cancel">
-                  Cancel
-                </button>
-              </div>
+
+            <div class="pt-4 pb-1 px-4">
+              <i class="bi bi-exclamation-circle text-danger mb-2" style="font-size: 3rem; display: block;"></i>
+              <h4 class="fw-bold mb-1">Delete Account?</h4>
+              <p class="text-danger fw-medium small mb-0">This action cannot be undone.</p>
             </div>
+
+            <div class="modal-body px-4 py-2 text-start">
+            </div>
+
+            <div class="modal-footer border-top-0 justify-content-center pt-2 pb-4 gap-2">
+              <button type="button" class="btn btn-light px-4 fw-medium" data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-danger px-4 fw-medium" id="confirm-delete-btn">
+                Yes, Delete
+              </button>
+            </div>
+
           </div>
         </div>
       </section>
