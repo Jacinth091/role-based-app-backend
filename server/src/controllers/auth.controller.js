@@ -5,6 +5,7 @@ const { SECRET_KEY } = require("../config.js");
 
 const login = async (req, res) => {
   const { userStr, password } = req.body;
+  console.log(req.body);
   try {
     console.log("Body: ", req.body);
     if (!userStr || !userStr.trim() || !password || !password.trim()) {
@@ -12,14 +13,15 @@ const login = async (req, res) => {
         error: "Username/Email and Password are required!"
       });
     }
+
     const cleanUserStr = userStr.trim();
     const user = accounts.find(
       (u) => u.email && u.email.toLowerCase() === cleanUserStr.toLowerCase() ||
         (u.username && u.username.toLowerCase() === cleanUserStr.toLowerCase())
     );
+    console.log("User: ", user);
     if (!user) {
-      console.log("BRUEEHHHHHH");
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         error: "Account not found! Register first.",
       });
@@ -29,10 +31,12 @@ const login = async (req, res) => {
         success: false,
         notVerified: true,
         error: "Account not verified!",
-        email: user.email,
       });
     }
-    if (!(await bcrypt.compare(password, user.password))) {
+    const passwordValid = await bcrypt.compare(password, user.password);
+    console.log("Password Valid: ", passwordValid);
+    if (!passwordValid) {
+      console.log("Hello Crazzzyyy");
       return res.status(401).json({
         success: false,
         error: "Invalid Credentials",
@@ -44,16 +48,16 @@ const login = async (req, res) => {
       { expiresIn: "1h" },
     );
 
+    console.log("Hellooooooooo");
     return res.status(200).json({
       success: true,
       token,
-      user: {
+      data: {
         username: user.username,
         email: user.email,
         role: user.role,
         first_name: user.first_name,
         last_name: user.last_name,
-        middle_name: user.middle_name
       },
     });
   } catch (error) {
@@ -103,14 +107,12 @@ const register = async (req, res) => {
       success: true,
       message: "User Registered Successfully!",
       data: {
-        username: newUser.username,
-        email: newUser.email,
+        username: username
       }
     });
   } catch (error) {
     console.error("An error occurred! ", error);
     return res.status(500).json({
-      success: false,
       error: "Internal Server Error!",
     });
   }
@@ -121,9 +123,11 @@ const profile = async (req, res) => {
 };
 
 const verifyEmail = async (req, res) => {
-  console.log("REq.body Email: ", req.body);
   const { email } = req.body;
   try {
+    if (!email || !email.trim()) {
+      return res.status(400).json({ error: "Email is required" });
+    }
     const user = accounts.find(
       (u) => u.email && u.email.toLowerCase() === email.toLowerCase()
     );
