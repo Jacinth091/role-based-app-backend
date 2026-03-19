@@ -4,7 +4,9 @@ const bcryptjs = require("bcryptjs");
 const cors = require("cors");
 const AuthRoutes = require("./routes/auth.route.js");
 const AdminRoutes = require("./routes/admin.route.js");
+const EmployeeRoutes = require("./routes/employee.route.js")
 const PublicRoutes = require("./routes/public.route.js");
+const DepartmentRoutes = require('./routes/department.route.js');
 const { accounts } = require("./data.js");
 const { SECRET_KEY, PORT } = require("./config.js");
 
@@ -31,6 +33,8 @@ try {
 app.use("/api/content", PublicRoutes);
 app.use("/api", AuthRoutes);
 app.use("/api/admin", AdminRoutes);
+app.use('/api/employee', EmployeeRoutes);
+app.use('/api/department', DepartmentRoutes);
 
 app.listen(PORT, () => {
   console.log(`Backend runing on http://localhost:${PORT}`);
