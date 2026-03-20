@@ -16,6 +16,8 @@ script2.js.bak
 *~
 .DS_Store
 
+test_api.js
+
 # Logs
 logs/
 *.log
