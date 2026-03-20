@@ -54,4 +54,24 @@ async function verifyEmail(email) {
   }
 }
 
-export { login, register, verifyEmail };
+async function getProfile() {
+  try {
+    const token = sessionStorage.getItem("authToken");
+    if (!token) return null;
+
+    const response = await fetch(`${backendConnection}/profile`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Network Error: ", error);
+    return null;
+  }
+}
+
+export { login, register, verifyEmail, getProfile };
