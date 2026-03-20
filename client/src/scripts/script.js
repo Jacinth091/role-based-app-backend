@@ -6,7 +6,7 @@ import {
   getUserById,
   resetAccountPassword,
 } from "../api/admin.api.js";
-import { login, register, verifyEmail } from "../api/auth.api.js";
+import { getProfile, login, register, verifyEmail } from "../api/auth.api.js";
 import { getDepartmentById, getDepartmentList } from "../api/department.api.js";
 import {
   addNewEmployee,
@@ -186,16 +186,23 @@ function handleRouting() {
   }
 }
 
-window.addEventListener("load", () => {
-  const session = getSession();
+window.addEventListener("load", async () => {
+  const token = sessionStorage.getItem("authToken");
   let isLoggedIn = false;
-  if (session?.token && session?.user) {
-    currentUser = session.user;
-    setAuthState(true, session.user);
-    configureNavbar(true, session.user);
-    renderProfile();
-    isLoggedIn = true;
+
+  if (token) {
+    const response = await getProfile();
+    if (response?.success && response?.data) {
+      currentUser = response.data;
+      setAuthState(true, response.data);
+      configureNavbar(true, response.data);
+      renderProfile();
+      isLoggedIn = true;
+    } else {
+      clearSession();
+    }
   }
+
   if (!window.location.hash || window.location.hash === "#/") {
     window.location.hash = isLoggedIn ? "#/profile" : "#/home";
   } else {
