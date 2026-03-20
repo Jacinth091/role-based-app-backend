@@ -53,7 +53,7 @@ const getAccountsList = async (req, res) => {
 }
 
 const createAccount = async (req, res) => {
-  const { first_name, last_name, email, password, role, verified } = req.body;
+  const { first_name, last_name, email, username, password, role, verified } = req.body;
   try {
     if (!first_name?.trim() || !last_name?.trim() || !email?.trim() || !role?.trim()) {
       return res.status(400).json({ success: false, error: "Important fields should not be empty." });
