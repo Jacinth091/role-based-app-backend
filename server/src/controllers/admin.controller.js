@@ -123,6 +123,7 @@ const editAccount = async (req, res) => {
     if (first_name) account.first_name = first_name.trim();
     if (last_name) account.last_name = last_name.trim();
     if (email) account.email = email.trim();
+    if (username) account.username = username.trim();
     if (role) account.role = role.trim();
     if (verified !== undefined) account.verified = verified;
 
