@@ -126,7 +126,28 @@ const register = async (req, res) => {
 };
 
 const profile = async (req, res) => {
-  res.json({ user: req.user });
+  try {
+    const user = accounts.find((u) => u.id === req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found!" });
+    }
+    res.json({
+      success: true,
+      data: {
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        first_name: user.first_name,
+        last_name: user.last_name,
+      },
+    });
+  } catch (error) {
+    console.error("An error occurred! ", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal Server Error!",
+    });
+  }
 };
 
 const verifyEmail = async (req, res) => {
