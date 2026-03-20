@@ -10,14 +10,15 @@ const login = async (req, res) => {
     console.log("Body: ", req.body);
     if (!userStr || !userStr.trim() || !password || !password.trim()) {
       return res.status(400).json({
-        error: "Username/Email and Password are required!"
+        error: "Username/Email and Password are required!",
       });
     }
 
     const cleanUserStr = userStr.trim();
     const user = accounts.find(
-      (u) => u.email && u.email.toLowerCase() === cleanUserStr.toLowerCase() ||
-        (u.username && u.username.toLowerCase() === cleanUserStr.toLowerCase())
+      (u) =>
+        (u.email && u.email.toLowerCase() === cleanUserStr.toLowerCase()) ||
+        (u.username && u.username.toLowerCase() === cleanUserStr.toLowerCase()),
     );
     console.log("User: ", user);
     if (!user) {
@@ -42,11 +43,9 @@ const login = async (req, res) => {
         error: "Invalid Credentials",
       });
     }
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      SECRET_KEY,
-      { expiresIn: "1h" },
-    );
+    const token = jwt.sign({ id: user.id, role: user.role }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
 
     console.log("Hellooooooooo");
     return res.status(200).json({
@@ -71,17 +70,25 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   console.log("Request Body: ", req.body);
-  const { username, email, first_name, last_name, middle_name, password } = req.body;
+  const { username, email, first_name, last_name, middle_name, password } =
+    req.body;
   try {
-    if (!username.trim() || !password.trim() || !email.trim() || !first_name.trim() || !last_name.trim()) {
+    if (
+      !username.trim() ||
+      !password.trim() ||
+      !email.trim() ||
+      !first_name.trim() ||
+      !last_name.trim()
+    ) {
       return res.status(400).json({
         success: false,
         error: "Important fields are required.",
       });
     }
     const user = accounts.find(
-      (u) => u.email && u.email.toLowerCase() === email.toLowerCase() ||
-        (u.username && u.username.toLowerCase() === username.toLowerCase())
+      (u) =>
+        (u.email && u.email.toLowerCase() === email.toLowerCase()) ||
+        (u.username && u.username.toLowerCase() === username.toLowerCase()),
     );
     if (user) {
       return res.status(409).json({
@@ -95,7 +102,7 @@ const register = async (req, res) => {
       username,
       email,
       first_name,
-      middle_name: middle_name ? middle_name : '',
+      middle_name: middle_name ? middle_name : "",
       last_name,
       password: hashedPassword,
       role: "user",
@@ -107,8 +114,8 @@ const register = async (req, res) => {
       success: true,
       message: "User Registered Successfully!",
       data: {
-        username: username
-      }
+        email: newUser.email,
+      },
     });
   } catch (error) {
     console.error("An error occurred! ", error);
@@ -124,31 +131,40 @@ const profile = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
   const { email } = req.body;
+  console.log("Verify Email Request — email:", email);
+  console.log(
+    "Current accounts:",
+    accounts.map((a) => ({ id: a.id, email: a.email, verified: a.verified })),
+  );
+
   try {
     if (!email || !email.trim()) {
       return res.status(400).json({ error: "Email is required" });
     }
     const user = accounts.find(
-      (u) => u.email && u.email.toLowerCase() === email.toLowerCase()
+      (u) => u.email && u.email.toLowerCase() === email.toLowerCase(),
     );
-    if (!user) {
-      return res.status(404).json({
-        success: false,
 
-        error: "User not found!",
-      });
+    console.log("Matched user:", user ?? "NOT FOUND");
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found!" });
     }
+    if (user.verified) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Account is already verified." });
+    }
+
     user.verified = true;
-    return res.status(200).json({
-      success: true,
-      message: "Email Verified Successfully!",
-    });
+    return res
+      .status(200)
+      .json({ success: true, message: "Email Verified Successfully!" });
   } catch (error) {
     console.error("An error occurred! ", error);
-    return res.status(500).json({
-      success: false,
-      error: "Internal Server Error!",
-    });
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal Server Error!" });
   }
 };
 
