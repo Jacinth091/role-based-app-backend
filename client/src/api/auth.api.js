@@ -21,7 +21,6 @@ async function login(userStr, password) {
   }
 }
 
-
 async function register(formData) {
   try {
     const response = await fetch(`${backendConnection}/register`, {
@@ -48,13 +47,10 @@ async function verifyEmail(email) {
       body: JSON.stringify({ email }),
     });
     const data = await response.json();
-    if (response.ok) {
-      return data;
-    } else {
-      return null;
-    }
+    return data;
   } catch (error) {
     console.error("Network Error: ", error);
+    return null;
   }
 }
 
